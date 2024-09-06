@@ -8,7 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "node src/scripts/generateProduct.js",
     "getExpensiveProducts": "node src/scripts/getExpensiveProducts",
-    "getTotalPrice": " node src/scripts/getTotalPrice"
+    "getTotalPrice": " node src/scripts/getTotalPrice",
+    "checkProductsCategory": "node src/scripts/checkProductsCategory",
+    "transformArray": "node src/scripts/transformArray",
+    "logFormattedData": "node src/scripts/logFormattedData",
+    "createFiles": "node src/scripts/createFiles"
   },
   "keywords": [],
   "author": "Anastasiia Tarasiuk <nastytaras52@gmail.com>",
