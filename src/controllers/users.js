@@ -1,8 +1,12 @@
-import { findUserByEmail, createActiveSession } from '../services/auth.js';
+import {
+  clearToken,
+  findUserByEmail,
+  updateUserWithToken,
+} from '../services/auth.js';
 import createHttpError from 'http-errors';
 import { createUser } from '../services/auth.js';
 import bcrypt from 'bcrypt';
-import { THIRTY_DAYS } from '../constants/constants.js';
+// import { THIRTY_DAYS } from '../constants/constants.js';
 
 export const registerUsersController = async (req, res) => {
   const user = await findUserByEmail(req.body.email);
@@ -11,12 +15,12 @@ export const registerUsersController = async (req, res) => {
     throw createHttpError(409, 'Email in use');
   }
 
-  await createUser(req.body);
+  const newUser = await createUser(req.body);
+  console.log(newUser);
 
   res.status(201).json({
-    status: 201,
-    message: 'Successfully registered a user!',
-    data: { name: req.body.name, email: req.body.email },
+    user: { name: req.body.name, email: req.body.email },
+    token: newUser.token,
   });
 };
 
@@ -30,26 +34,21 @@ export const loginUsersController = async (req, res) => {
   const isCorrect = await bcrypt.compare(req.body.password, user.password);
 
   if (!isCorrect) {
-    throw createHttpError(401, 'Password are wrong');
+    throw createHttpError(401, 'Email or password are wrong');
   }
-  const session = await createActiveSession(user._id);
 
-  res.cookie('refreshToken', session.refreshToken, {
-    httpOnly: true,
-    expires: new Date(Date.now() + THIRTY_DAYS),
-  });
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expires: new Date(Date.now() + THIRTY_DAYS),
-  });
+  const updatedUser = await updateUserWithToken(user._id);
 
   res.json({
-    status: 200,
-    message: 'Successfully logged in an user!',
-    data: {
-      accessToken: session.accessToken,
-    },
+    user: { name: updatedUser.name, email: req.body.email },
+    token: updatedUser.token,
   });
 };
 
-export const refreshUsersController = async (req, res) => {};
+export const logoutUsersController = async (req, res) => {
+  const id = req.user._id;
+
+  await clearToken(id);
+
+  res.sendStatus(204);
+};
